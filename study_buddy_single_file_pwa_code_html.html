@@ -1,73 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Study Buddy — AI-made Study Tips & Mini-Quizzes</title>
-  <meta name="description" content="Study Buddy — free AI-generated study tips and mini-quizzes for kids & teens. Built to be lightweight, offline-capable, and free to host on GitHub Pages or Netlify.">
-  <meta name="theme-color" content="#6C5CE7">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Buddy</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#6C5CE7;--muted:#94A3B8;--glass:rgba(255,255,255,0.03)}
-    *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Arial,sans-serif}
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%, #0f1724 100%);color:#E6EEF8}
-    .wrap{max-width:920px;margin:28px auto;padding:18px}
-    header{display:flex;gap:12px;align-items:center}
-    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#00C2FF);display:grid;place-items:center;font-weight:700;color:#071029}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:6px 0 18px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,0.5);backdrop-filter: blur(6px)}
-    .tip{font-size:18px;padding:12px;border-radius:10px;background:var(--glass);min-height:90px;display:flex;align-items:center}
-    .controls{display:flex;gap:8px;margin-top:12px}
-    button{background:linear-gradient(90deg,var(--accent),#00C2FF);border:0;padding:10px 12px;border-radius:10px;color:#071029;font-weight:700;cursor:pointer}
-    .muted-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
-    .small{padding:8px 10px;font-size:13px}
-    .quiz-list{margin-top:12px}
-    .option{margin:6px 0;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer}
-    .option.correct{outline:2px solid #2ecc71}
-    .option.wrong{outline:2px solid #ff6b6b}
-    .favorites{margin-top:12px}
-    label{display:block;color:var(--muted);font-size:13px;margin-top:8px}
-    input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
-    .support{display:flex;gap:8px;align-items:center}
-    .badge{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted)}
-    .share{margin-top:12px;display:flex;gap:8px}
-    @media(max-width:880px){.grid{grid-template-columns:1fr;}.logo{width:54px;height:54px}}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #2563eb;
+    }
+    #question-box, #answer-box {
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 1.2rem;
+    }
+    #question-box {
+      background: #e0f2fe;
+      font-weight: bold;
+    }
+    #answer-box {
+      background: #fef3c7;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #1e40af;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">SB</div>
-      <div>
-        <h1>Study Buddy — AI-made Study Tips & Mini-Quizzes</h1>
-        <p class="lead">Quick tips, micro-quizzes, and friendly voice — all free. Edit content live using a Google Sheet CSV (no coding needed).</p>
-      </div>
-    </header>
+  <h1>📚 Study Buddy</h1>
+  <div id="question-box">Loading question...</div>
+  <div id="answer-box">Loading answer...</div>
+  <button onclick="loadQuestions()">🔄 Load Another</button>
 
-    <div class="grid">
-      <div class="card">
-        <div class="tip" id="tipArea">Loading a friendly study tip…</div>
-        <div class="controls">
-          <button id="newTipBtn">🎯 New Tip</button>
-          <button id="speakBtn" class="muted-btn small">🔊 Speak</button>
-          <button id="saveBtn" class="muted-btn small">⭐ Save</button>
-          <button id="quizBtn" class="muted-btn small">❓ Quick Quiz</button>
-        </div>
+  <script>
+    async function loadQuestions() {
+      try {
+        const res = await fetch("YOUR_WEB_APP_URL_HERE"); // 🔑 replace this
+        const data = await res.json();
 
-        <div id="quizArea" class="quiz-list" style="display:none"></div>
+        // Pick a random question
+        const randomIndex = Math.floor(Math.random() * data.length);
+        const item = data[randomIndex];
 
-        <div class="support" style="margin-top:14px">
-          <div class="badge">Supporter: <span id="supporterState">No</span></div>
-          <div style="flex:1"></div>
-          <a href="https://ko-fi.com/yourpage" target="_blank" rel="noopener" style="text-decoration:none"><button class="small">☕ Support (Ko-fi)</button></a>
-        </div>
+        document.getElementById("question-box").innerText = "Q: " + item.Question;
+        document.getElementById("answer-box").innerText = "A: " + item.Answer;
+      } catch (err) {
+        console.error("Error loading data:", err);
+        document.getElementById("question-box").innerText = "⚠️ Failed to load question.";
+        document.getElementById("answer-box").innerText = "";
+      }
+    }
 
-        <div class="share">
-          <button id="shareBtn" class="muted-btn small">Share</button>
-          <button id="copyBtn" class="muted-btn small">Copy Link</button>
-        </div>
+    // Load first question on startup
+    loadQuestions();
+  </script>
+</body>
+</html>
 
         <div style="margin-top:12px;color:var(--muted);font-size:13px">Pro tip: connect a Google Sheet to update tips instantly — paste your published CSV URL below and click Load.</div>
         <label>Google Sheet CSV URL</label>
