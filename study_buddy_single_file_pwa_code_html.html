@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Study Buddy — AI-made Study Tips & Mini-Quizzes</title>
+  <meta name="description" content="Study Buddy — free AI-generated study tips and mini-quizzes for kids & teens. Built to be lightweight, offline-capable, and free to host on GitHub Pages or Netlify.">
+  <meta name="theme-color" content="#6C5CE7">
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#6C5CE7;--muted:#94A3B8;--glass:rgba(255,255,255,0.03)}
+    *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Arial,sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%, #0f1724 100%);color:#E6EEF8}
+    .wrap{max-width:920px;margin:28px auto;padding:18px}
+    header{display:flex;gap:12px;align-items:center}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#00C2FF);display:grid;place-items:center;font-weight:700;color:#071029}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:6px 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,0.5);backdrop-filter: blur(6px)}
+    .tip{font-size:18px;padding:12px;border-radius:10px;background:var(--glass);min-height:90px;display:flex;align-items:center}
+    .controls{display:flex;gap:8px;margin-top:12px}
+    button{background:linear-gradient(90deg,var(--accent),#00C2FF);border:0;padding:10px 12px;border-radius:10px;color:#071029;font-weight:700;cursor:pointer}
+    .muted-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+    .small{padding:8px 10px;font-size:13px}
+    .quiz-list{margin-top:12px}
+    .option{margin:6px 0;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer}
+    .option.correct{outline:2px solid #2ecc71}
+    .option.wrong{outline:2px solid #ff6b6b}
+    .favorites{margin-top:12px}
+    label{display:block;color:var(--muted);font-size:13px;margin-top:8px}
+    input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .support{display:flex;gap:8px;align-items:center}
+    .badge{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted)}
+    .share{margin-top:12px;display:flex;gap:8px}
+    @media(max-width:880px){.grid{grid-template-columns:1fr;}.logo{width:54px;height:54px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">SB</div>
+      <div>
+        <h1>Study Buddy — AI-made Study Tips & Mini-Quizzes</h1>
+        <p class="lead">Quick tips, micro-quizzes, and friendly voice — all free. Edit content live using a Google Sheet CSV (no coding needed).</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="tip" id="tipArea">Loading a friendly study tip…</div>
+        <div class="controls">
+          <button id="newTipBtn">🎯 New Tip</button>
+          <button id="speakBtn" class="muted-btn small">🔊 Speak</button>
+          <button id="saveBtn" class="muted-btn small">⭐ Save</button>
+          <button id="quizBtn" class="muted-btn small">❓ Quick Quiz</button>
+        </div>
+
+        <div id="quizArea" class="quiz-list" style="display:none"></div>
+
+        <div class="support" style="margin-top:14px">
+          <div class="badge">Supporter: <span id="supporterState">No</span></div>
+          <div style="flex:1"></div>
+          <a href="https://ko-fi.com/yourpage" target="_blank" rel="noopener" style="text-decoration:none"><button class="small">☕ Support (Ko-fi)</button></a>
+        </div>
+
+        <div class="share">
+          <button id="shareBtn" class="muted-btn small">Share</button>
+          <button id="copyBtn" class="muted-btn small">Copy Link</button>
+        </div>
+
+        <div style="margin-top:12px;color:var(--muted);font-size:13px">Pro tip: connect a Google Sheet to update tips instantly — paste your published CSV URL below and click Load.</div>
+        <label>Google Sheet CSV URL</label>
+        <input id="sheetUrl" type="text" placeholder="https://docs.google.com/spreadsheets/d/..../pub?output=csv">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="loadSheetBtn" class="muted-btn small">Load</button>
+          <button id="resetBtn" class="muted-btn small">Reset Default</button>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Your Favorites</strong>
+            <div style="color:var(--muted);font-size:13px">Saved tips you kept</div>
+          </div>
+          <div><button id="clearFavs" class="muted-btn small">Clear</button></div>
+        </div>
+        <div class="favorites" id="favList"></div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+        <strong>Monetize & Manage</strong>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">Add an affiliate link, a donation button, and enable premium packs.</div>
+
+        <label>Affiliate / Store Link</label>
+        <input id="affiliate" type="text" placeholder="https://www.example.com/affiliate?tag=YOURTAG">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="saveAffiliate" class="muted-btn small">Save</button>
+          <button id="openAffiliate" class="muted-btn small">Open</button>
+        </div>
+
+        <label style="margin-top:12px">Support code (enter to unlock premium)</label>
+        <input id="supportCode" type="text" placeholder="Enter support code you gave to donors">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="applyCode" class="muted-btn small">Apply code</button>
+          <button id="revokeCode" class="muted-btn small">Revoke</button>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+        <div style="color:var(--muted);font-size:13px">Want to edit content using an AI? Copy this prompt and paste it into ChatGPT / Google AI Studio to generate 200 short study tips or quiz items in CSV/JSON format.</div>
+        <pre style="background:#071224;padding:8px;border-radius:8px;color:#9ad3ff;margin-top:8px;font-size:12px">PROMPT: Generate 200 short study tips (6-12 words each) for high school students, comma-separated values with columns: category,tip. Then generate 200 multiple-choice quiz items as JSON array with keys: question,options (array),answerIndex,explanation.</pre>
+      </div>
+    </div>
+
+    <footer>
+      <div>Deploy for FREE: Upload this single file to GitHub Pages or Netlify. Add Google AdSense code once approved. Use Ko-fi to collect donations and send support codes to donors to unlock premium packs.</div>
+    </footer>
+  </div>
+
+<script>
+// ======= Default AI-generated content (you can replace this by loading a Google Sheet CSV) ======
+const defaultTips = [
+  "Study in 25-minute focused sprints (Pomodoro)",
+  "Turn notes into quick flashcards — review daily",
+  "Teach a friend one concept to remember it better",
+  "Use timers: 45 minutes study, 10 minutes break",
+  "Highlight only key words, not whole paragraphs",
+  "Make one-page summaries after each lesson",
+  "Sleep well: memory forms during deep sleep",
+  "Ask 'why' and 'how' — not just 'what'",
+  "Read out loud for tougher passages",
+  "Switch subjects to avoid mental fatigue",
+  "Practice past test questions under time limits",
+  "Make tiny goals: finish 1 section, then rest",
+  "Use diagrams or doodles to explain ideas",
+  "Drink water and put your phone on Do Not Disturb",
+  "Create study playlists that help you focus",
+  "Set a specific study start time every day",
+  "Explain answers in 2–3 sentences to check understanding",
+  "Use spaced repetition for tricky facts",
+  "Rewrite class notes the same day to retain",
+  "Focus on progress, not perfection — small wins!"
+];
+
+const defaultQuizzes = [
+  {question: "What is the purpose of the Pomodoro technique?", options: ["To study all day","To focus with short sprints","To make longer notes","To replace sleep"], answerIndex:1, explanation: "Pomodoro uses short focused work sprints (e.g., 25 min) to improve concentration."},
+  {question: "Which is best for long-term memory?", options: ["Cramming all night","Spaced repetition","Only rereading","Listening to music loudly"], answerIndex:1, explanation: "Spaced repetition spaces reviews over time to strengthen memory."},
+  {question: "What helps comprehension when reading?", options: ["Skimming only","Reading out loud","Highlighting everything","Studying while tired"], answerIndex:1, explanation: "Reading out loud slows you down and improves understanding."},
+  {question: "A useful way to check your understanding is to:", options: ["Teach someone else","Avoid asking questions","Copy notes verbatim","Use complex fonts"], answerIndex:0, explanation: "Teaching someone forces you to organize and explain concepts clearly."},
+  {question: "Which habit helps focus during study?", options: ["Phone notifications on","Study in short blocks","Multitask with videos","Study without breaks"], answerIndex:1, explanation: "Short, focused blocks with breaks maintain attention."},
+  {question: "What is a quick way to make notes memorable?", options: ["Use keywords and images","Write entire textbook pages","Ignore summaries","Study without sleep"], answerIndex:0, explanation: "Keywords and images create strong memory cues."},
+  {question: "Good sleep before an exam does: ", options: ["Hurts performance","Helps memory consolidation","Is unnecessary","Causes forgetting"], answerIndex:1, explanation: "Sleep helps consolidate memories formed during study."},
+  {question: "To reduce distractions you should: ", options: ["Keep phone nearby","Use Do Not Disturb","Study in bed","Multitask often"], answerIndex:1, explanation: "Do Not Disturb reduces interruptions and helps concentration."},
+  {question: "Spacing study sessions over days is called: ", options: ["Massed practice","Spaced repetition","Cramming","Passive review"], answerIndex:1, explanation: "Spaced repetition spreads reviews across time for better retention."},
+  {question: "Which tool is best for quick self-quizzing?", options: ["Flashcards","Highlighting entire chapter","Sleeping during study","Watching random videos"], answerIndex:0, explanation: "Flashcards are ideal for active recall and quick reviews."}
+];
+
+// ======= App state and helpers ======
+let tips = [...defaultTips];
+let quizzes = [...defaultQuizzes];
+let favorites = JSON.parse(localStorage.getItem('sb_favs') || '[]');
+let supporter = JSON.parse(localStorage.getItem('sb_supporter') || 'false');
+let affiliate = localStorage.getItem('sb_affiliate') || '';
+const tipArea = document.getElementById('tipArea');
+const favList = document.getElementById('favList');
+const supporterState = document.getElementById('supporterState');
+
+function randomInt(max){ return Math.floor(Math.random()*max); }
+
+function showRandomTip(){
+  if(tips.length===0){ tipArea.textContent = 'No tips found — load a sheet or reset default.'; return; }
+  const t = tips[randomInt(tips.length)];
+  tipArea.textContent = t;
+}
+
+function speakTip(){
+  const text = tipArea.textContent || '';
+  if(!text) return;
+  if('speechSynthesis' in window){
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1; u.pitch=1;
+    const voices = window.speechSynthesis.getVoices();
+    if(voices && voices.length) u.voice = voices.find(v=>v.lang.startsWith('en'))||voices[0];
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } else alert('TTS not supported in this browser.');
+}
+
+function saveFavorite(){
+  const t = tipArea.textContent; if(!t) return;
+  if(!favorites.includes(t)) favorites.unshift(t);
+  if(favorites.length>50) favorites.pop();
+  localStorage.setItem('sb_favs', JSON.stringify(favorites));
+  renderFavorites();
+}
+function renderFavorites(){
+  favList.innerHTML='';
+  if(favorites.length===0){ favList.innerHTML='<div style="color:var(--muted);font-size:13px">No favorites yet — save tips you love.</div>'; return; }
+  favorites.forEach((f,i)=>{
+    const d = document.createElement('div'); d.className='option'; d.textContent = f;
+    d.addEventListener('click',()=>{ tipArea.textContent = f; window.scrollTo({top:0,behavior:'smooth'}); });
+    favList.appendChild(d);
+  });
+}
+
+function showQuiz(){
+  const qa = quizzes[randomInt(quizzes.length)];
+  const qaBox = document.getElementById('quizArea');
+  qaBox.style.display='block'; qaBox.innerHTML='';
+  const q = document.createElement('div'); q.style.marginBottom='8px'; q.innerHTML = '<strong>'+qa.question+'</strong>';
+  qaBox.appendChild(q);
+  qa.options.forEach((opt,idx)=>{
+    const b = document.createElement('div'); b.className='option'; b.textContent = opt;
+    b.addEventListener('click',()=>{
+      if(idx===qa.answerIndex){ b.classList.add('correct'); alert('✅ Correct!\n\n'+(qa.explanation||'')); }
+      else{ b.classList.add('wrong'); alert('❌ Wrong.\n\n'+(qa.explanation||'')); }
+    });
+    qaBox.appendChild(b);
+  });
+}
+
+// ======= Load CSV from published Google Sheet (simple parser) ======
+async function loadFromCsv(url){
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Network error');
+    const txt = await res.text();
+    // Expect CSV with columns: type,content,options,answer (type can be TIP or QUIZ)
+    const lines = txt.split('\n').map(l=>l.trim()).filter(l=>l);
+    const newTips=[]; const newQuizzes=[];
+    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
+    const idxType = headers.indexOf('type');
+    const idxContent = headers.indexOf('content');
+    const idxOptions = headers.indexOf('options');
+    const idxAnswer = headers.indexOf('answer');
+    for(let i=1;i<lines.length;i++){
+      const cols = parseCsvLine(lines[i]);
+      const type = (cols[idxType]||'').toUpperCase();
+      if(type==='TIP'){ if(cols[idxContent]) newTips.push(cols[idxContent]); }
+      else if(type==='QUIZ'){ 
+        const q = cols[idxContent]||'';
+        const opts = (cols[idxOptions]||'').split('|').map(s=>s.trim()).filter(s=>s);
+        const ans = parseInt(cols[idxAnswer]||'0');
+        if(q && opts.length>=2) newQuizzes.push({question:q,options:opts,answerIndex:isNaN(ans)?0:ans, explanation:''});
+      }
+    }
+    if(newTips.length) tips = newTips;
+    if(newQuizzes.length) quizzes = newQuizzes;
+    showRandomTip(); renderFavorites(); alert('Loaded sheet: '+newTips.length+' tips, '+newQuizzes.length+' quizzes');
+  }catch(e){ alert('Failed to load sheet: '+e.message); }
+}
+function parseCsvLine(line){ // naive CSV parser for simple sheets without embedded commas
+  const parts = []; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='"'){ inQ=!inQ; continue;} if(c===',' && !inQ){ parts.push(cur); cur=''; } else cur+=c; }
+  parts.push(cur); return parts.map(p=>p.trim());
+}
+
+// ======= Supporter (manual code) ======
+function applySupportCode(){
+  const code = document.getElementById('supportCode').value.trim();
+  if(!code) return alert('Enter a support code you gave to donors');
+  // For simplicity: the default demo code is 'GIVE2025' — you will give unique codes to supporters manually.
+  if(code==='GIVE2025'){ localStorage.setItem('sb_supporter','true'); supporter=true; updateSupportUi(); alert('Thanks! Premium packs unlocked.'); }
+  else alert('Invalid code. After support, message donors a code you choose (e.g., GIVE2025) that they enter here.');
+}
+function revokeSupport(){ localStorage.setItem('sb_supporter','false'); supporter=false; updateSupportUi(); alert('Support revoked.'); }
+function updateSupportUi(){ supporterState.textContent = supporter? 'Yes' : 'No'; }
+
+// ======= Affiliate ======
+function saveAffiliate(){ const a=document.getElementById('affiliate').value.trim(); localStorage.setItem('sb_affiliate',a); affiliate=a; alert('Affiliate link saved'); }
+function openAffiliate(){ if(affiliate) window.open(affiliate,'_blank'); else alert('No affiliate link saved.'); }
+
+// ======= Share / Copy ======
+function shareApp(){ const url = location.href; const title='Study Buddy — quick AI tips'; if(navigator.share){ navigator.share({title,url}); } else { prompt('Share this link',url); } }
+function copyLink(){ navigator.clipboard.writeText(location.href).then(()=>alert('Link copied')); }
+
+// ======= Init UI events ======
+document.getElementById('newTipBtn').addEventListener('click',showRandomTip);
+document.getElementById('speakBtn').addEventListener('click',speakTip);
+document.getElementById('saveBtn').addEventListener('click',saveFavorite);
+document.getElementById('quizBtn').addEventListener('click',showQuiz);
+document.getElementById('loadSheetBtn').addEventListener('click',()=>{
+  const url = document.getElementById('sheetUrl').value.trim(); if(!url) return alert('Paste the published Google Sheet CSV URL (see instructions).'); loadFromCsv(url);
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{ tips=[...defaultTips]; quizzes=[...defaultQuizzes]; showRandomTip(); alert('Reset to defaults'); });
+document.getElementById('clearFavs').addEventListener('click',()=>{ favorites=[]; localStorage.removeItem('sb_favs'); renderFavorites(); });
+document.getElementById('applyCode').addEventListener('click',applySupportCode);
+document.getElementById('revokeCode').addEventListener('click',revokeSupport);
+document.getElementById('saveAffiliate').addEventListener('click',saveAffiliate);
+document.getElementById('openAffiliate').addEventListener('click',openAffiliate);
+document.getElementById('shareBtn').addEventListener('click',shareApp);
+document.getElementById('copyBtn').addEventListener('click',copyLink);
+
+// ======= Boot ======
+showRandomTip(); renderFavorites(); updateSupportUi();
+
+// ======= Helpful notes (shown in console) ======
+console.log('Study Buddy loaded. To update content without code: create a Google Sheet with columns: type,content,options,answer. Publish to web -> CSV and paste the published CSV URL into the input field.');
+</script>
+</body>
+</html>
